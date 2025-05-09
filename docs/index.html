@@ -143,6 +143,11 @@
                     <i class="bi bi-search"></i> Search MCP Servers
                 </button>
             </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="api-docs-tab" data-bs-toggle="tab" data-bs-target="#api-docs-tab-pane" type="button" role="tab" aria-controls="api-docs-tab-pane" aria-selected="false" style="background-color: #f8d7da; color: #721c24; font-weight: bold;">
+                    API Documentation
+                </button>
+            </li>
         </ul>
 
         <!-- Tab Content -->
@@ -208,6 +213,195 @@
                 
                 <div id="noServersFound" class="alert alert-info" style="display: none;">
                     No servers found matching your search criteria.
+                </div>
+            </div>
+            
+            <!-- API Documentation Tab -->
+            <div class="tab-pane fade" id="api-docs-tab-pane" role="tabpanel" aria-labelledby="api-docs-tab" tabindex="0">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="mb-0">API Documentation</h3>
+                    </div>
+                    <div class="card-body">
+                        <h2>MCP Security Certification API</h2>
+                        <p class="lead">The MCP Security Certification API provides programmatic access to security certifications and analyses for Model Context Protocol (MCP) server implementations.</p>
+                        
+                        <h3>Base URL</h3>
+                        <pre><code>https://mcp-security-production.up.railway.app/api</code></pre>
+                        
+                        <h3>Authentication</h3>
+                        <p>Currently, the API is publicly accessible and does not require authentication.</p>
+                        
+                        <h3>Endpoints</h3>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h4>GET /search</h4>
+                            </div>
+                            <div class="card-body">
+                                <p>Check if a repository has been analyzed and has a security profile.</p>
+                                
+                                <h5>Parameters</h5>
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Type</th>
+                                            <th>Description</th>
+                                            <th>Required</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>repo_url</td>
+                                            <td>string</td>
+                                            <td>GitHub repository URL (e.g., https://github.com/username/repository)</td>
+                                            <td>Yes</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                
+                                <h5>Response</h5>
+                                <pre><code>{
+  "found": true,
+  "has_profile": true,
+  "repo_id": "60f8a9b2e6b3c2001a1b2c3d",
+  "profile_id": "60f8a9b2e6b3c2001a1b2c3e"
+}</code></pre>
+                                
+                                <h5>Example</h5>
+                                <pre><code>curl "https://mcp-security-production.up.railway.app/api/search?repo_url=https://github.com/username/repository"</code></pre>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h4>GET /report</h4>
+                            </div>
+                            <div class="card-body">
+                                <p>Get a security report for a repository in markdown format.</p>
+                                
+                                <h5>Parameters</h5>
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Type</th>
+                                            <th>Description</th>
+                                            <th>Required</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>repo_url</td>
+                                            <td>string</td>
+                                            <td>GitHub repository URL (e.g., https://github.com/username/repository)</td>
+                                            <td>Yes</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                
+                                <h5>Response</h5>
+                                <p>Returns a markdown document with the security report.</p>
+                                
+                                <h5>Example</h5>
+                                <pre><code>curl "https://mcp-security-production.up.railway.app/api/report?repo_url=https://github.com/username/repository"</code></pre>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h4>POST /analyze</h4>
+                            </div>
+                            <div class="card-body">
+                                <p>Trigger a security analysis for a GitHub repository.</p>
+                                
+                                <h5>Request Body</h5>
+                                <pre><code>{
+  "repo_url": "https://github.com/username/repository"
+}</code></pre>
+                                
+                                <h5>Response</h5>
+                                <pre><code>{
+  "status": "started",
+  "message": "Analysis started. Check back in a few minutes for results."
+}</code></pre>
+                                
+                                <h5>Example</h5>
+                                <pre><code>curl -X POST "https://mcp-security-production.up.railway.app/api/analyze" \
+     -H "Content-Type: application/json" \
+     -d '{"repo_url": "https://github.com/username/repository"}'</code></pre>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h4>GET /search-servers</h4>
+                            </div>
+                            <div class="card-body">
+                                <p>Search for MCP servers by keyword.</p>
+                                
+                                <h5>Parameters</h5>
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Type</th>
+                                            <th>Description</th>
+                                            <th>Required</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>keyword</td>
+                                            <td>string</td>
+                                            <td>Keyword to search for (e.g., "memory", "retrieval")</td>
+                                            <td>No</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                
+                                <h5>Response</h5>
+                                <pre><code>{
+  "count": 2,
+  "servers": [
+    {
+      "_id": "60f8a9b2e6b3c2001a1b2c3d",
+      "name": "Example MCP Server",
+      "repo_url": "https://github.com/username/repository",
+      "primary_function": "Memory",
+      "certification_level": "Silver",
+      "security_score": 8.5,
+      "evaluation_date": "2023-07-15T12:00:00Z"
+    },
+    {
+      "_id": "60f8a9b2e6b3c2001a1b2c3e",
+      "name": "Another MCP Server",
+      "repo_url": "https://github.com/username/another-repo",
+      "primary_function": "Retrieval",
+      "certification_level": "Bronze",
+      "security_score": 6.2,
+      "evaluation_date": "2023-07-10T12:00:00Z"
+    }
+  ]
+}</code></pre>
+                                
+                                <h5>Example</h5>
+                                <pre><code>curl "https://mcp-security-production.up.railway.app/api/search-servers?keyword=memory"</code></pre>
+                            </div>
+                        </div>
+                        
+                        <h3>Error Responses</h3>
+                        <p>The API returns appropriate HTTP status codes for errors:</p>
+                        <ul>
+                            <li><strong>400 Bad Request</strong> - Invalid input parameters</li>
+                            <li><strong>404 Not Found</strong> - Repository or profile not found</li>
+                            <li><strong>500 Internal Server Error</strong> - Server-side error</li>
+                        </ul>
+                        
+                        <h3>Rate Limiting</h3>
+                        <p>Currently, there are no rate limits in place, but please be considerate with your API usage.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -539,7 +733,6 @@
             // Hide no results message and show table
             noServersFound.style.display = 'none';
             serversContainer.style.display = 'block';
-            
             // Add each server to the table
             servers.forEach(server => {
                 const row = document.createElement('tr');
@@ -623,20 +816,25 @@
             }
         }
         
-        // Helper functions
-        function isValidGithubUrl(url) {
-            // More permissive pattern to match GitHub URLs with additional paths, query params, etc.
-            const pattern = /^https:\/\/github\.com\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+/;
-            return pattern.test(url);
-        }
-        
+        // Helper function to normalize GitHub URLs
         function normalizeGithubUrl(url) {
-            // Extract the base repository URL (https://github.com/org/repo)
-            const match = url.match(/^(https:\/\/github\.com\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+)/);
+            // Remove trailing slash if present
+            url = url.replace(/\/$/, '');
+            
+            // Remove any additional path components after the repository name
+            const match = url.match(/^(https:\/\/github\.com\/[^\/]+\/[^\/]+)/);
             if (match) {
                 return match[1];
             }
+            
             return url;
+        }
+        
+        // Helper functions
+        function isValidGithubUrl(url) {
+            // More permissive pattern that allows additional path components
+            const pattern = /^https:\/\/github\.com\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+/;
+            return pattern.test(url);
         }
         
         function showError(element, message) {
@@ -700,10 +898,5 @@
             reportSection.style.display = 'none';
         }
     </script>
-    
-    <!-- Load marked.js for markdown rendering -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </body>
 </html>
-
-echo "" >> docs/index.html

@@ -32,11 +32,11 @@ class MCPAnalysisAgent:
         self.llm_client = get_llm_client(LLM_PROVIDER, config)
         
         # Load evaluation criteria from file
-        with open("evaluation-criterea.md", "r") as f:
+        with open("framework/evaluation-criterea.md", "r") as f:
             self.evaluation_criteria = f.read()
             
         # Load evaluation template from file
-        with open("evaluation-template.md", "r") as f:
+        with open("framework/evaluation-template.md", "r") as f:
             self.evaluation_template = f.read()
     
     def analyze_repository(self, repo_url: str) -> dict[str, any]:

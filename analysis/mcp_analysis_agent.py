@@ -551,11 +551,16 @@ Focus on practical, actionable insights rather than theoretical concerns. Avoid 
         
         # Extract certification details with more flexible section detection
         certification_section = self._extract_section(analysis_result, "Certification Details", None)
+        
+        # Set current date and expiration date (1 year from now)
+        current_date = datetime.datetime.now()
+        expiration_date = current_date + datetime.timedelta(days=365)
+        
         certification = {
             "level": "None",
             "justification": "",
             "conditions": "",
-            "expiration": datetime.datetime.now() + datetime.timedelta(days=180)
+            "expiration": expiration_date
         }
         
         if certification_section:
@@ -603,6 +608,71 @@ Focus on practical, actionable insights rather than theoretical concerns. Avoid 
         code_quality = self._extract_section(analysis_result, "Code Quality Assessment", None)
         security_profile["code_quality"] = code_quality
         
+        # Update the markdown report with correct dates
+        import re
+        eval_date_str = current_date.strftime("%Y-%m-%d")
+        exp_date_str = expiration_date.strftime("%Y-%m-%d")
+        
+        # Replace or add evaluation date
+        updated_markdown = analysis_result
+        
+        # Try to replace existing evaluation date patterns
+        eval_date_patterns = [
+            r"(Evaluation Date:).*",
+            r"(Date of Evaluation:).*",
+            r"(Evaluated on:).*",
+            r"(Evaluation:).*\d{4}"
+        ]
+        
+        for pattern in eval_date_patterns:
+            updated_markdown = re.sub(pattern, r"\1 " + eval_date_str, updated_markdown, flags=re.IGNORECASE)
+        
+        # Try to replace existing expiration date patterns
+        exp_date_patterns = [
+            r"(Expiration Date:).*",
+            r"(Valid Until:).*",
+            r"(Expires on:).*",
+            r"(Expiration:).*\d{4}"
+        ]
+        
+        for pattern in exp_date_patterns:
+            updated_markdown = re.sub(pattern, r"\1 " + exp_date_str, updated_markdown, flags=re.IGNORECASE)
+        
+        # Check if evaluation date exists in the updated markdown
+        if not re.search(r"Evaluation Date:", updated_markdown, re.IGNORECASE):
+            # Try to find a good place to insert it - after the title or before the first section
+            if "# Security Certification Report" in updated_markdown:
+                updated_markdown = updated_markdown.replace(
+                    "# Security Certification Report", 
+                    "# Security Certification Report\n\nEvaluation Date: " + eval_date_str
+                )
+            elif "## Executive Summary" in updated_markdown:
+                updated_markdown = updated_markdown.replace(
+                    "## Executive Summary", 
+                    "Evaluation Date: " + eval_date_str + "\n\n## Executive Summary"
+                )
+            else:
+                # Just add it at the beginning
+                updated_markdown = "Evaluation Date: " + eval_date_str + "\n\n" + updated_markdown
+        
+        # Check if expiration date exists in the updated markdown
+        if not re.search(r"Expiration Date:", updated_markdown, re.IGNORECASE):
+            # Try to find the certification section to add it
+            if "## Certification Details" in updated_markdown:
+                # Add after the certification section header
+                updated_markdown = updated_markdown.replace(
+                    "## Certification Details", 
+                    "## Certification Details\n\nExpiration Date: " + exp_date_str
+                )
+            elif "Certification Level:" in updated_markdown:
+                # Add after the certification level
+                updated_markdown = updated_markdown.replace(
+                    "Certification Level:", 
+                    "Certification Level:\nExpiration Date: " + exp_date_str
+                )
+        
+        security_profile["markdown_report"] = updated_markdown
+        
         return security_profile
     
     def _extract_score(self, line: str) -> float:
@@ -633,6 +703,14 @@ Focus on practical, actionable insights rather than theoretical concerns. Avoid 
     
     def _store_security_profile(self, security_profile: dict[str, any]) -> ObjectId:
         """Store the security profile in the database"""
+        # Ensure the evaluation_date is set
+        if "evaluation_date" not in security_profile:
+            security_profile["evaluation_date"] = datetime.datetime.now()
+        
+        # Ensure the certification expiration is set to 1 year from evaluation date
+        if "certification" in security_profile and "expiration" not in security_profile["certification"]:
+            security_profile["certification"]["expiration"] = security_profile["evaluation_date"] + datetime.timedelta(days=365)
+        
         # Check if a profile already exists for this repository
         existing_profile = db.security_profiles.find_one({"repo_id": security_profile["repo_id"]})
         

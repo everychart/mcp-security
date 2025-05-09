@@ -129,7 +129,6 @@
         <div class="header">
             <h1>MCP Security Certification</h1>
             <p class="lead">Verify and explore security certifications for Model Context Protocol (MCP) server implementations</p>
-            <a href="api-docs.html" class="btn btn-info mt-3" style="display: inline-block !important; margin: 10px 0; font-weight: bold;">API Documentation</a>
         </div>
 
         <!-- Main Navigation Tabs -->
@@ -144,7 +143,12 @@
                     <i class="bi bi-search"></i> Search MCP Servers
                 </button>
             </li>
-        </ul>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" href="api-docs.html" target="_blank">
+                    <i class="bi bi-file-code"></i> API Documentation
+                </a>
+            </li>
+    </ul>
 
         <!-- Tab Content -->
         <div class="tab-content" id="mainTabsContent">
@@ -212,7 +216,17 @@
                 </div>
             </div>
         </div>
-
+        <!-- API Documentation Tab -->
+        <div class="tab-pane fade" id="api-docs-tab-pane" role="tabpanel" aria-labelledby="api-docs-tab" tabindex="0">
+            <div id="api-docs-content">
+                <div class="text-center my-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                <p class="mt-2">Loading API Documentation...</p>
+        </div>
+    </div>
+</div>
         <!-- Status Messages -->
         <div id="statusContainer" style="display: none;"></div>
         
@@ -689,20 +703,41 @@
         }
         
         function displayReport(markdownText) {
-            // Use marked.js to render the markdown
-            reportContainer.innerHTML = marked.parse(markdownText);
-            reportSection.style.display = 'block';
-            
-            // Scroll to the report
-            reportSection.scrollIntoView({ behavior: 'smooth' });
-        }
-        
-        function hideReport() {
-            reportSection.style.display = 'none';
-        }
-    </script>
+    // Use marked.js to render the markdown
+    reportContainer.innerHTML = marked.parse(markdownText);
+    reportSection.style.display = 'block';
+    // Scroll to the report
+    reportSection.scrollIntoView({ behavior: 'smooth' });
+}
+
+function hideReport() {
+    reportSection.style.display = 'none';
+}
+</script>
+
+<!-- Load marked.js for markdown rendering -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<script>
+// Load API documentation content when the tab is shown
+document.getElementById('api-docs-tab').addEventListener('shown.bs.tab', function (e) {
+    const apiDocsContent = document.getElementById('api-docs-content');
     
-    <!-- Load marked.js for markdown rendering -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    // Only load the content if it hasn't been loaded already
+    if (apiDocsContent.querySelector('.spinner-border')) {
+        // Create an iframe to load the content
+        const iframe = document.createElement('iframe');
+        iframe.src = 'api-docs.html';
+        iframe.style.width = '100%';
+        iframe.style.height = '800px';
+        iframe.style.border = 'none';
+        iframe.style.overflow = 'auto';
+        
+        // Clear the loading indicator and add the iframe
+        apiDocsContent.innerHTML = '';
+        apiDocsContent.appendChild(iframe);
+    }
+});
+</script>
 </body>
 </html>

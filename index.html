@@ -287,7 +287,7 @@
         
         // Main repository check function
         async function checkRepository() {
-            const repoUrl = repoUrlInput.value.trim();
+            let repoUrl = repoUrlInput.value.trim();
             
             if (!repoUrl) {
                 showError(repoSearchError, 'Please enter a GitHub repository URL');
@@ -298,6 +298,9 @@
                 showError(repoSearchError, 'Please enter a valid GitHub repository URL (https://github.com/username/repository)');
                 return;
             }
+            
+            // Normalize the GitHub URL to the base repository URL
+            repoUrl = normalizeGithubUrl(repoUrl);
             
             // Reset UI
             hideError(repoSearchError);
@@ -360,6 +363,9 @@
         
         // Analyze repository function
         async function analyzeRepository(repoUrl) {
+            // Normalize the GitHub URL to the base repository URL
+            repoUrl = normalizeGithubUrl(repoUrl);
+            
             hideStatus();
             showLoading('Starting security analysis...');
             
@@ -422,6 +428,9 @@
         
         // Poll for analysis results
         async function pollForResults(repoUrl) {
+            // Normalize the GitHub URL to the base repository URL
+            repoUrl = normalizeGithubUrl(repoUrl);
+            
             showLoading('Checking analysis status...');
             hideStatus();
             
@@ -585,6 +594,9 @@
         
         // Function to view a server report directly from search results
         async function viewServerReport(repoUrl) {
+            // Normalize the GitHub URL to the base repository URL
+            repoUrl = normalizeGithubUrl(repoUrl);
+            
             showLoading('Fetching security report...');
             hideStatus();
             hideReport();
@@ -613,8 +625,18 @@
         
         // Helper functions
         function isValidGithubUrl(url) {
-            const pattern = /^https:\/\/github\.com\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+\/?$/;
+            // More permissive pattern to match GitHub URLs with additional paths, query params, etc.
+            const pattern = /^https:\/\/github\.com\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+/;
             return pattern.test(url);
+        }
+        
+        function normalizeGithubUrl(url) {
+            // Extract the base repository URL (https://github.com/org/repo)
+            const match = url.match(/^(https:\/\/github\.com\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+)/);
+            if (match) {
+                return match[1];
+            }
+            return url;
         }
         
         function showError(element, message) {

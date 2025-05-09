@@ -11,6 +11,7 @@ ollama==0.1.5  # Python client for Ollama
 
 # For API server
 flask==2.3.3
+flask-cors==3.0.10
 redis==5.0.1
 rq==1.15.1
 
@@ -19,4 +20,4 @@ pytest==7.4.3
 pytest-mock==3.12.0
 
 # For MongoDB connection
-dnspython==2.4.2  # Required for MongoDB Atlas connection strings
+dnspython==2.4.2  # Required for MongoDB Atlas connection stringsflask-cors==3.0.10

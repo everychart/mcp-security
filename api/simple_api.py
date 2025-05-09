@@ -7,7 +7,7 @@ import threading
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 import certifi
-from flask_cors import CORS
+from flask_cors import CORS  # Make sure this import is present
 
 # Add the parent directory to the path so we can import our modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -16,7 +16,11 @@ from config import MONGODB_URI, MONGODB_DB_NAME
 from scripts.export_profile import export_security_profile
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+# Configure CORS to allow requests from your GitHub Pages domain
+CORS(app, origins=["https://everychart.github.io"])  # Add your GitHub Pages domain here
+
+# Alternatively, to allow requests from any domain (less secure but easier for testing):
+# CORS(app)
 
 # MongoDB connection
 client = MongoClient(MONGODB_URI, tlsCAFile=certifi.where())

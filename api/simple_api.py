@@ -285,6 +285,19 @@ def is_valid_github_url(url):
     pattern = r'^https://github\.com/[a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+/?$'
     return bool(re.match(pattern, url))
 
+@app.after_request
+def add_cors_headers(response):
+    response.headers.add('Access-Control-Allow-Origin', 'https://everychart.github.io')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+    return response
+
+# Handle OPTIONS requests for CORS preflight
+@app.route('/api/<path:path>', methods=['OPTIONS'])
+@app.route('/api/', defaults={'path': ''}, methods=['OPTIONS'])
+def options_handler(path):
+    return Response('', status=200)
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)

@@ -20,7 +20,7 @@ def get_anthropic_client(config):
     from anthropic import Anthropic
     
     # Get API key from environment or config
-    api_key = os.environ.get("LLM_API_KEY") or config.get("LLM_API_KEY")
+    api_key = os.environ.get("ANTHROPIC_API_KEY") or config.get("ANTHROPIC_API_KEY")
     model = config.get("LLM_MODEL", "claude-3-5-sonnet-20240620")
     
     print(f"Initializing Anthropic client with model: {model}")

@@ -27,7 +27,7 @@ class MCPAnalysisAgent:
         # Get LLM client from factory
         config = {
             "LLM_MODEL": LLM_MODEL,
-            "LLM_API_KEY": os.environ.get("LLM_API_KEY", "")
+            "LLM_API_KEY": os.environ.get("ANTHROPIC_API_KEY", "")
         }
         self.llm_client = get_llm_client(LLM_PROVIDER, config)
         

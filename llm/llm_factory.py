@@ -18,6 +18,10 @@ def get_llm_client(provider: str, config: Dict[str, Any]):
 def get_anthropic_client(config):
     """Get Anthropic Claude client"""
     from anthropic import Anthropic
+    import anthropic
+    
+    # Print version for debugging
+    print(f"Anthropic SDK version: {anthropic.__version__}")
     
     # Get API key from environment or config
     api_key = os.environ.get("ANTHROPIC_API_KEY") or config.get("ANTHROPIC_API_KEY")
@@ -34,6 +38,8 @@ def get_anthropic_client(config):
     
     try:
         client = Anthropic(api_key=api_key)
+        # Check what attributes the client has
+        print(f"Client attributes: {dir(client)}")
         return AnthropicClient(client, model)
     except Exception as e:
         print(f"Error initializing Anthropic client: {str(e)}")
@@ -45,31 +51,61 @@ class AnthropicClient:
     def __init__(self, client, model):
         self.client = client
         self.model = model
+        # Check if we're using the new API
+        self.has_messages_api = hasattr(self.client, 'messages')
+        print(f"Client has messages API: {self.has_messages_api}")
     
     def generate_completion(self, prompt, system_prompt=None, temperature=0.7):
         """Generate completion using Anthropic Claude"""
         try:
             # Create the messages array with the user prompt
-            messages = [{"role": "user", "content": prompt}]
-            
-            # Prepare the API call parameters
-            params = {
-                "model": self.model,
-                "messages": messages,
-                "max_tokens": 4000,
-                "temperature": temperature
-            }
-            
-            # Add system prompt if provided
-            if system_prompt:
-                params["system"] = system_prompt
-            
-            # Call the API
             print(f"Calling Anthropic API with model: {self.model}")
-            response = self.client.messages.create(**params)
             
-            # Extract the response text
-            return response.content[0].text
+            if self.has_messages_api:
+                # New API (v0.5.0+)
+                messages = [{"role": "user", "content": prompt}]
+                
+                # Prepare the API call parameters
+                params = {
+                    "model": self.model,
+                    "messages": messages,
+                    "max_tokens": 4000,
+                    "temperature": temperature
+                }
+                
+                # Add system prompt if provided
+                if system_prompt:
+                    params["system"] = system_prompt
+                
+                # Call the API
+                response = self.client.messages.create(**params)
+                
+                # Extract the response text
+                return response.content[0].text
+            else:
+                # Old API (pre v0.5.0)
+                print("Using legacy Anthropic API")
+                prompt_text = f"\n\nHuman: {prompt}\n\nAssistant:"
+                
+                # Check if completions is available
+                if hasattr(self.client, 'completions'):
+                    response = self.client.completions.create(
+                        model=self.model,
+                        prompt=prompt_text,
+                        max_tokens_to_sample=4000,
+                        temperature=temperature
+                    )
+                    return response.completion
+                else:
+                    # Direct API call as fallback
+                    print("Using direct completion method")
+                    response = self.client.completion(
+                        model=self.model,
+                        prompt=prompt_text,
+                        max_tokens_to_sample=4000,
+                        temperature=temperature
+                    )
+                    return response.completion
             
         except Exception as e:
             print(f"Exception when calling Claude API: {str(e)}")
@@ -78,6 +114,9 @@ class AnthropicClient:
                 print(f"Status code: {e.status_code}")
             if hasattr(e, 'response') and hasattr(e.response, 'text'):
                 print(f"Response text: {e.response.text}")
+            
+            import traceback
+            print(f"Detailed error: {traceback.format_exc()}")
             
             # Return error message
             return f"ERROR: Failed to generate completion with Anthropic API. Error: {str(e)}"

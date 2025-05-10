@@ -13,7 +13,7 @@ from bson.objectid import ObjectId
 # Add the parent directory to the path so we can import our modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from config import MONGODB_URI, MONGODB_DB_NAME, LLM_PROVIDER, LLM_MODEL, LLM_ENDPOINT
+from config import MONGODB_URI, MONGODB_DB_NAME, LLM_PROVIDER, LLM_MODEL
 from llm.llm_factory import get_llm_client
 
 # MongoDB connection
@@ -27,7 +27,7 @@ class MCPAnalysisAgent:
         # Get LLM client from factory
         config = {
             "LLM_MODEL": LLM_MODEL,
-            "LLM_ENDPOINT": LLM_ENDPOINT
+            "LLM_API_KEY": os.environ.get("LLM_API_KEY", "")
         }
         self.llm_client = get_llm_client(LLM_PROVIDER, config)
         

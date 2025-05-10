@@ -1,6 +1,5 @@
 from typing import Dict, Any
 import os
-from .ollama_client import OllamaClient
 
 def get_llm_client(provider: str, config: Dict[str, Any]):
     """
@@ -13,28 +12,34 @@ def get_llm_client(provider: str, config: Dict[str, Any]):
     Returns:
         An LLM client instance
     """
-    if provider.lower() == "ollama":
-        base_url = config.get("LLM_ENDPOINT", "http://localhost:11434").rsplit("/api", 1)[0]
-        model = config.get("LLM_MODEL", "qwen:7b")
-        return OllamaClient(base_url=base_url, model=model)
-    elif provider.lower() == "anthropic":
-        return get_anthropic_client(config)
-    else:
-        raise ValueError(f"Unsupported LLM provider: {provider}")
+    # Ignore the provider parameter and always use Anthropic
+    return get_anthropic_client(config)
     
 def get_anthropic_client(config):
     """Get Anthropic Claude client"""
     from anthropic import Anthropic
     
-    api_key = os.environ.get("ANTHROPIC_API_KEY") or config.get("ANTHROPIC_API_KEY")
-    model = config.get("LLM_MODEL", "claude-3-sonnet-20240229")
+    # Get API key from environment or config
+    api_key = os.environ.get("LLM_API_KEY") or config.get("LLM_API_KEY")
+    model = config.get("LLM_MODEL", "claude-3-5-sonnet-20240620")
+    
+    print(f"Initializing Anthropic client with model: {model}")
+    print(f"API key exists: {bool(api_key)}")
+    print(f"API key length: {len(api_key) if api_key else 0}")
     
     if not api_key:
-        raise ValueError("Anthropic API key not found")
+        print("WARNING: No API key found for Anthropic")
+        # Return a dummy client that returns error messages
+        return DummyClient()
     
-    client = Anthropic(api_key=api_key)
-    
-    return AnthropicClient(client, model)
+    try:
+        client = Anthropic(api_key=api_key)
+        return AnthropicClient(client, model)
+    except Exception as e:
+        print(f"Error initializing Anthropic client: {str(e)}")
+        import traceback
+        print(traceback.format_exc())
+        return DummyClient()
 
 class AnthropicClient:
     def __init__(self, client, model):
@@ -43,14 +48,41 @@ class AnthropicClient:
     
     def generate_completion(self, prompt, system_prompt=None, temperature=0.7):
         """Generate completion using Anthropic Claude"""
-        response = self.client.messages.create(
-            model=self.model,
-            max_tokens=4000,
-            temperature=temperature,
-            system=system_prompt,
-            messages=[
-                {"role": "user", "content": prompt}
-            ]
-        )
-        
-        return response.content[0].text
+        try:
+            # Create the messages array with the user prompt
+            messages = [{"role": "user", "content": prompt}]
+            
+            # Prepare the API call parameters
+            params = {
+                "model": self.model,
+                "messages": messages,
+                "max_tokens": 4000,
+                "temperature": temperature
+            }
+            
+            # Add system prompt if provided
+            if system_prompt:
+                params["system"] = system_prompt
+            
+            # Call the API
+            print(f"Calling Anthropic API with model: {self.model}")
+            response = self.client.messages.create(**params)
+            
+            # Extract the response text
+            return response.content[0].text
+            
+        except Exception as e:
+            print(f"Exception when calling Claude API: {str(e)}")
+            # Print more detailed error information
+            if hasattr(e, 'status_code'):
+                print(f"Status code: {e.status_code}")
+            if hasattr(e, 'response') and hasattr(e.response, 'text'):
+                print(f"Response text: {e.response.text}")
+            
+            # Return error message
+            return f"ERROR: Failed to generate completion with Anthropic API. Error: {str(e)}"
+
+class DummyClient:
+    """A dummy client that returns error messages when the real client can't be initialized"""
+    def generate_completion(self, prompt, system_prompt=None, temperature=0.7):
+        return "ERROR: Could not initialize Anthropic client. Please check your API key and configuration."

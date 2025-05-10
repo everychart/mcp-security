@@ -8,11 +8,11 @@ load_dotenv()
 MONGODB_URI = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
 MONGODB_DB_NAME = os.getenv("MONGODB_DB_NAME", "mcp_security")
 
-# LLM configuration
-LLM_PROVIDER = os.getenv("LLM_PROVIDER", "ollama")  # Options: "ollama", "openai", "anthropic", "huggingface"
-LLM_MODEL = os.getenv("LLM_MODEL", "llama3")  
-LLM_API_KEY = os.getenv("LLM_API_KEY", "")  # Not needed for Ollama
-LLM_ENDPOINT = os.getenv("LLM_ENDPOINT", "http://localhost:11434/api/chat")  # Ollama local endpoint
+# LLM configuration - hardcoded to use Anthropic
+LLM_PROVIDER = "anthropic"  # Hardcoded to use Anthropic
+LLM_MODEL = os.getenv("LLM_MODEL", "claude-3-5-sonnet-20240620")  # Default to a Claude model
+LLM_API_KEY = os.getenv("LLM_API_KEY", "")  # API key should still come from env
+
 
 # Application configuration
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"

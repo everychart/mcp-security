@@ -48,12 +48,25 @@ class MCPAnalysisAgent:
     """Agent for analyzing MCP server repositories using LLM"""
     
     def __init__(self):
-        # Get LLM client from factory
-        config = {
-            "LLM_MODEL": LLM_MODEL,
-            "LLM_API_KEY": os.environ.get("ANTHROPIC_API_KEY", "")
+        # Initialize the LLM client
+        from llm.llm_factory import get_llm_client
+        
+        # Create a config dictionary with all provider options
+        self.llm_config = {
+            "ANTHROPIC_API_KEY": ANTHROPIC_API_KEY,
+            "ANTHROPIC_MODEL": ANTHROPIC_MODEL,
+            "GEMINI_API_KEY": GEMINI_API_KEY,
+            "GEMINI_MODEL": GEMINI_MODEL,
+            "FALLBACK_PROVIDERS": FALLBACK_PROVIDERS,
+            # For backward compatibility
+            "LLM_MODEL": ANTHROPIC_MODEL  # Use ANTHROPIC_MODEL as the default LLM_MODEL
         }
-        self.llm_client = get_llm_client(LLM_PROVIDER, config)
+        
+        # Get the LLM client with fallback support
+        self.llm_client = get_llm_client(LLM_PROVIDER, self.llm_config)
+        
+        # Initialize MongoDB connection
+        self.db = db
         
         # Load evaluation criteria from file
         with open("framework/evaluation-criterea.md", "r") as f:

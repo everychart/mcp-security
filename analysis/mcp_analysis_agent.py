@@ -13,7 +13,10 @@ from bson.objectid import ObjectId
 # Add the parent directory to the path so we can import our modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+# Import configuration variables
 from config import (
+    MONGODB_URI,
+    MONGODB_DB_NAME,
     LLM_PROVIDER, 
     FALLBACK_PROVIDERS,
     ANTHROPIC_API_KEY,
@@ -21,11 +24,25 @@ from config import (
     GEMINI_API_KEY,
     GEMINI_MODEL
 )
+
+# Then initialize your MongoDB client
+client = MongoClient(MONGODB_URI, tlsCAFile=certifi.where())
+db = client[MONGODB_DB_NAME]
+
+# Initialize LLM client with fallback support
 from llm.llm_factory import get_llm_client
 
-# MongoDB connection
-client = MongoClient(MONGODB_URI,tlsCAFile=certifi.where())
-db = client[MONGODB_DB_NAME]
+# Create a config dictionary with all provider options
+llm_config = {
+    "ANTHROPIC_API_KEY": ANTHROPIC_API_KEY,
+    "ANTHROPIC_MODEL": ANTHROPIC_MODEL,
+    "GEMINI_API_KEY": GEMINI_API_KEY,
+    "GEMINI_MODEL": GEMINI_MODEL,
+    "FALLBACK_PROVIDERS": FALLBACK_PROVIDERS
+}
+
+# Get the LLM client with fallback support
+llm_client = get_llm_client(LLM_PROVIDER, llm_config)
 
 class MCPAnalysisAgent:
     """Agent for analyzing MCP server repositories using LLM"""

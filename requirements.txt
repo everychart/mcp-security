@@ -4,11 +4,13 @@ gitpython==3.1.40
 requests==2.31.0
 markdown==3.5
 python-dotenv==1.0.0
+certifi>=2021.10.8
 # bson==0.5.10  # This causes conflicts with pymongo's bson module
 
-# For Ollama integration
+# For LLM integration
 ollama==0.1.5  # Python client for Ollama
 anthropic==0.8.1
+google-generativeai>=0.3.0
 
 # For API server
 flask==2.3.3
@@ -20,6 +22,7 @@ flask-limiter==2.8.0
 # For testing
 pytest==7.4.3
 pytest-mock==3.12.0
+pyyaml>=6.0
 
 # For MongoDB connection
 dnspython==2.4.2  # Required for MongoDB Atlas connection stringsflask-cors==3.0.10

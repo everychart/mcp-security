@@ -13,7 +13,14 @@ from bson.objectid import ObjectId
 # Add the parent directory to the path so we can import our modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from config import MONGODB_URI, MONGODB_DB_NAME, LLM_PROVIDER, LLM_MODEL
+from config import (
+    LLM_PROVIDER, 
+    FALLBACK_PROVIDERS,
+    ANTHROPIC_API_KEY,
+    ANTHROPIC_MODEL,
+    GEMINI_API_KEY,
+    GEMINI_MODEL
+)
 from llm.llm_factory import get_llm_client
 
 # MongoDB connection

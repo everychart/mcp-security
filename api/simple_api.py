@@ -14,7 +14,16 @@ from flask_limiter.util import get_remote_address
 # Add the parent directory to the path so we can import our modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from config import MONGODB_URI, MONGODB_DB_NAME
+from config import (
+    MONGODB_URI, 
+    MONGODB_DB_NAME,
+    LLM_PROVIDER,
+    FALLBACK_PROVIDERS,
+    ANTHROPIC_API_KEY,
+    ANTHROPIC_MODEL,
+    GEMINI_API_KEY,
+    GEMINI_MODEL
+)
 from scripts.export_profile import export_security_profile
 
 app = Flask(__name__)
@@ -227,6 +236,15 @@ def run_analysis_in_background(repo_url):
         
         print(f"Using Python executable: {python_executable}")
         
+        # Pass LLM configuration as environment variables
+        env = os.environ.copy()
+        env["LLM_PROVIDER"] = LLM_PROVIDER
+        env["FALLBACK_PROVIDERS"] = ",".join(FALLBACK_PROVIDERS)
+        env["ANTHROPIC_API_KEY"] = ANTHROPIC_API_KEY
+        env["ANTHROPIC_MODEL"] = ANTHROPIC_MODEL
+        env["GEMINI_API_KEY"] = GEMINI_API_KEY
+        env["GEMINI_MODEL"] = GEMINI_MODEL
+        
         # Run the analysis script as a subprocess with full output capture
         print(f"Executing: {python_executable} {script_path} {repo_url}")
         
@@ -234,7 +252,8 @@ def run_analysis_in_background(repo_url):
         result = subprocess.run(
             [python_executable, script_path, repo_url],
             capture_output=True,
-            text=True
+            text=True,
+            env=env
         )
         
         # Log the output regardless of success/failure
@@ -284,7 +303,7 @@ def run_analysis_in_background(repo_url):
 
 def is_valid_github_url(url):
     """Validate that a URL is a GitHub repository URL"""
-    pattern = r'^https://github\.com/[a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+/?$'
+    pattern = r'^https://github\.com/[a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+/?'
     return bool(re.match(pattern, url))
 
 @app.after_request

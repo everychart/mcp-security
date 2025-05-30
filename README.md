@@ -1,4 +1,3 @@
-```markdown
 # MCP Security Registry
 
 A community-driven registry of security evaluations for Model Context Protocol (MCP) server implementations.
@@ -56,5 +55,3 @@ We welcome contributions from the community! See our [Contributing Guidelines](C
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
-```
-
